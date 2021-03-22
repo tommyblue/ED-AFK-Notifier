@@ -13,6 +13,8 @@ hull damages and, in that case, immediately sends a
 (Windows or Linux), place it somewhere and create, in the same folder, a file named `config.toml`
 (see below for its content).
 
+If you have problems extracting the release file (tar.gz), use [7-zip](https://www.7-zip.org/download.html).
+
 ## Configuration
 
 The `config.toml` file, that must be placed along with the downloaded binary, must have the
@@ -43,8 +45,8 @@ from the bot.
 
 **Don't worry**, the bot itself can send you the id.
 
-Run the bot (better if you run it from a console, so you can read any log message) and send it
-a message with the text `/channel`. You'll receive the channel id in the response message.
+Run the bot and send it a message with the text `/channel`. You'll receive the channel id in the
+response message.  
 Copy the value and replace `<channel ID>` in the configuration file with that value, then restart
 the bot.  
 
