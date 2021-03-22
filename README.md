@@ -9,8 +9,9 @@ hull damages and, in that case, immediately sends a
 
 ## Usage
 
-[Download the binary](./releases/) for your operating system (Windows or Linux), place it somewhere and create,
-in the same folder, a file named `config.toml` (see below for its content).
+[Download the binary](https://github.com/tommyblue/ED-AFK-Notifier/releases) for your operating system
+(Windows or Linux), place it somewhere and create, in the same folder, a file named `config.toml`
+(see below for its content).
 
 ## Configuration
 
