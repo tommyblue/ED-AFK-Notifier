@@ -1,0 +1,8 @@
+[journal]
+    # path = "C:\\Users\\<Your User>\\Saved Games\\Frontier Developments\\Elite Dangerous" # Windows
+    path = "/home/<username>/.local/share/Steam/steamapps/compatdata/<numeric id>/pfx/drive_c/users/steamuser/Saved Games/Frontier Developments/Elite Dangerous/" # Linux
+    debug = false # Print a log line for each new line in the journal file
+
+[telegram]
+    token = "<bot token>" # Create a telegram bot using BotFather
+    channelId = 12345678 # Replace with the channel id, obtained sending the `/channel` message to the bot
