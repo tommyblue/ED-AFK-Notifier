@@ -15,6 +15,9 @@ hull damages and, in that case, immediately sends a
 
 If you have problems extracting the release file (tar.gz), use [7-zip](https://www.7-zip.org/download.html).
 
+Launch the game and, after you're sitting in your ship, run this program (don't run the program
+before launching ED or the tool could monitor the wrong journal file).
+
 ## Configuration
 
 The `config.toml` file, that must be placed along with the downloaded binary, must have the
