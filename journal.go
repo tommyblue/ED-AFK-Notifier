@@ -10,9 +10,11 @@ import (
 )
 
 type Journal struct {
-	Timestamp time.Time `json:"timestamp"`
-	Event     string    `json:"event"`
-	Health    float64   `json:"Health"`
+	Timestamp   time.Time `json:"timestamp"`
+	Event       string    `json:"event"`
+	Health      float64   `json:"Health"`
+	PlayerPilot bool      `json:"PlayerPilot"`
+	Fighter     bool      `json:"Fighter"`
 }
 
 func JournalFilePath(logPath string) string {

@@ -21,11 +21,14 @@ before launching ED or the tool could monitor the wrong journal file).
 ## Configuration
 
 The `config.toml` file, that must be placed along with the downloaded binary, must have the
-following content:
+following content (check the [config.example.toml](./config.example.toml) file for the latest
+version of the config file):
 
 ```toml
 [journal]
     Path = "<path to the journal directory>"
+    debug = false # Print a log line for each new line in the journal file
+    fighter = false # When true, send notification also for hull damage to the fighter
 
 [telegram]
     token = "<bot token>"

@@ -32,6 +32,8 @@ func main() {
 
 	startTime := time.Now()
 
+	wantFighterNotifs := viper.GetBool("journal.fighter")
+
 	for line := range t.Lines {
 		var j Journal
 		if err := json.Unmarshal([]byte(line.Text), &j); err != nil {
@@ -48,7 +50,16 @@ func main() {
 		}
 
 		if j.Event == "HullDamage" {
-			if err := bot.Send(fmt.Sprintf("Hull damage detected, integrity is %2f", j.Health)); err != nil {
+			if j.Fighter && !wantFighterNotifs {
+				continue
+			}
+
+			prefix := "Ship"
+			if j.Fighter {
+				prefix = "Fighter"
+			}
+
+			if err := bot.Send(fmt.Sprintf("%s hull damage detected, integrity is %2f", prefix, j.Health)); err != nil {
 				log.Printf("Error sending message: %v", err)
 			}
 		}
