@@ -1,4 +1,4 @@
-package main
+package bots
 
 import (
 	"fmt"
@@ -8,24 +8,24 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type Bot struct {
+type Telegram struct {
 	channelId int64
 	bot       *tgbotapi.BotAPI
 }
 
-func NewBot(token string, channelId int64) (*Bot, error) {
+func NewTelegram(token string, channelId int64) (*Telegram, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Bot{
+	return &Telegram{
 		bot:       bot,
 		channelId: channelId,
 	}, nil
 }
 
-func (bot *Bot) Start() {
+func (bot *Telegram) Start() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates, err := bot.bot.GetUpdatesChan(u)
@@ -53,7 +53,7 @@ func (bot *Bot) Start() {
 					msg.Text = bot.printHelp()
 				}
 
-				if err := bot.RawSend(msg); err != nil {
+				if err := bot.rawSend(msg); err != nil {
 					log.Printf("Error sending message: %v", err)
 				}
 			}
@@ -61,7 +61,7 @@ func (bot *Bot) Start() {
 	}()
 }
 
-func (bot *Bot) printHelp() string {
+func (bot *Telegram) printHelp() string {
 	var b strings.Builder
 
 	b.WriteString("Available commands:\n\n")
@@ -72,12 +72,12 @@ func (bot *Bot) printHelp() string {
 	return b.String()
 }
 
-func (bot *Bot) RawSend(msg tgbotapi.MessageConfig) error {
+func (bot *Telegram) rawSend(msg tgbotapi.MessageConfig) error {
 	_, err := bot.bot.Send(msg)
 	return err
 }
 
-func (bot *Bot) Send(text string) error {
+func (bot *Telegram) Send(text string) error {
 	if bot.channelId == 0 {
 		return fmt.Errorf("empty channel id, please use the /c command to obtain the value from the bot")
 	}

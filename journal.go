@@ -1,6 +1,7 @@
-package main
+package notifier
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-type Journal struct {
+type journalEvent struct {
 	Timestamp   time.Time `json:"timestamp"`
 	Event       string    `json:"event"`
 	Health      float64   `json:"Health"`
@@ -17,14 +18,15 @@ type Journal struct {
 	Fighter     bool      `json:"Fighter"`
 }
 
-func JournalFilePath(logPath string) string {
+func journalPath(logPath string) (string, error) {
 	files, err := os.ReadDir(logPath)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	var lastFile fs.DirEntry
 	var lastMod time.Time
+
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -36,7 +38,7 @@ func JournalFilePath(logPath string) string {
 
 		finfo, err := file.Info()
 		if err != nil {
-			log.Printf("Cannot get info for %s", file.Name())
+			log.Printf("cannot get info for %s", file.Name())
 			continue
 		}
 
@@ -46,5 +48,9 @@ func JournalFilePath(logPath string) string {
 		}
 	}
 
-	return filepath.Join(logPath, lastFile.Name())
+	if lastMod.IsZero() || lastFile.Name() == "" {
+		return "", fmt.Errorf("cannot find the journal file")
+	}
+
+	return filepath.Join(logPath, lastFile.Name()), nil
 }

@@ -1,4 +1,4 @@
-module github.com/tommyblue/ed-go-api
+module github.com/tommyblue/ED-AFK-Notifier
 
 go 1.15
 

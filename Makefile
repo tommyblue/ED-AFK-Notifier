@@ -6,7 +6,7 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 build: ## Build binary in the local env
-	GOFLAGS=-mod=vendor go build -v ./
+	GOFLAGS=-mod=vendor go build -v ./cmd/ed-afk-notifier
 
 test-short: ## Run tests with -short flag in the local env
 	GOFLAGS=-mod=vendor go test -short -v -race ./...
