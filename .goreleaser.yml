@@ -4,7 +4,7 @@ before:
   hooks:
 builds:
   -
-    main: .
+    main: ./cmd/ed-afk-notifier/main.go
     goos:
       - linux
       - windows
