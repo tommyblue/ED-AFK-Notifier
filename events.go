@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"fmt"
+	"math"
 )
 
 type eventFn func(*Notifier, journalEvent) error
@@ -16,7 +17,8 @@ func hullDamageEvent(e *Notifier, j journalEvent) error {
 		prefix = "Fighter"
 	}
 
-	if err := e.bot.Send(fmt.Sprintf("%s hull damage detected, integrity is %2f", prefix, j.Health)); err != nil {
+	h := int(math.Round(j.Health * 100))
+	if err := e.bot.Send(fmt.Sprintf("%s hull damage detected, integrity is %d%%", prefix, h)); err != nil {
 		return fmt.Errorf("error sending message: %v", err)
 	}
 
