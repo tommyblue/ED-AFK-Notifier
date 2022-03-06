@@ -17,7 +17,10 @@ func main() {
 		ChannelId:     viper.GetInt64("telegram.channelId"),
 		JournalPath:   viper.GetString("journal.path"),
 		FighterNotifs: viper.GetBool("journal.fighter"),
+		ShieldsNotifs: viper.GetBool("journal.shields"),
 	}
+
+	logConfig(cfg)
 
 	notifier, err := notifier.New(cfg)
 
@@ -36,4 +39,11 @@ func setupConfig() error {
 	viper.AddConfigPath(".")
 
 	return viper.ReadInConfig()
+}
+
+func logConfig(cfg *notifier.Cfg) {
+	log.Printf("Config:")
+	log.Printf("  Notify fighter status: %t", cfg.FighterNotifs)
+	log.Printf("  Notify shields status: %t", cfg.ShieldsNotifs)
+	log.Printf("  Journal file path: %s", cfg.JournalPath)
 }

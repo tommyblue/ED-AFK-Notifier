@@ -29,6 +29,7 @@ version of the config file):
     Path = "<path to the journal directory>"
     debug = false # Print a log line for each new line in the journal file
     fighter = false # When true, send notification also for hull damage to the fighter
+    shields = true # When true, send notification when shields state changes (up/down)
 
 [telegram]
     token = "<bot token>"

@@ -22,6 +22,7 @@ type Cfg struct {
 	ChannelId     int64
 	JournalPath   string
 	FighterNotifs bool
+	ShieldsNotifs bool // notify about shields state
 }
 
 // New returns a Notifier with provided configuration
@@ -49,8 +50,6 @@ func New(cfg *Cfg) (*Notifier, error) {
 func (e *Notifier) Start() error {
 	e.bot.Start()
 
-	log.Printf("Monitoring the journal file at %s", e.journalFile)
-
 	t, err := tail.TailFile(e.journalFile, tail.Config{Follow: true, Poll: true})
 	if err != nil {
 		return fmt.Errorf("cannot tail the log file: %v", err)
@@ -59,8 +58,9 @@ func (e *Notifier) Start() error {
 	startTime := time.Now()
 
 	events := map[string]eventFn{
-		"HullDamage": hullDamageEvent,
-		"Died":       diedEvent,
+		"HullDamage":  hullDamageEvent,
+		"Died":        diedEvent,
+		"ShieldState": shieldStateEvent,
 	}
 
 	for line := range t.Lines {

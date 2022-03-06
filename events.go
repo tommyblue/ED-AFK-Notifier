@@ -32,3 +32,18 @@ func diedEvent(e *Notifier, j journalEvent) error {
 
 	return nil
 }
+
+func shieldStateEvent(e *Notifier, j journalEvent) error {
+	var msg string
+	if j.ShieldsUp {
+		msg = "Shields are up again"
+	} else {
+		msg = "Shields are down!"
+	}
+
+	if err := e.bot.Send(msg); err != nil {
+		return fmt.Errorf("error sending message: %v", err)
+	}
+
+	return nil
+}
