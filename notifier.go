@@ -71,9 +71,10 @@ func (e *Notifier) initMissions() {
 			Active []struct {
 				MissionID int `json:"MissionID"`
 			} `json:"Active"` // contains active missions, logged at login
-			Event     string `json:"event"`
-			MissionID int    `json:"MissionID"`
-			Reward    int    `json:"Reward"`
+			Event       string `json:"event"`
+			MissionID   int    `json:"MissionID"`
+			Reward      int    `json:"Reward"`
+			TotalReward int    `json:"TotalReward"`
 		}
 		line := scanner.Text()
 		if err := json.Unmarshal([]byte(line), &j); err != nil {
@@ -109,6 +110,9 @@ func (e *Notifier) initMissions() {
 		case "MissionAbandoned":
 			e.activeMissions--
 			delete(e.loggedMissions, j.MissionID)
+		case "Bounty":
+			e.totalPiratesReward += j.TotalReward
+			e.killedPirates++
 		}
 	}
 
@@ -118,6 +122,7 @@ func (e *Notifier) initMissions() {
 
 	log.Println("Active missions:", e.activeMissions)
 	log.Println("Obtained reward for missions until now:", e.totalMissionsReward)
+	log.Println("Obtained reward for killed pirates (", e.killedPirates, ") until now:", e.totalPiratesReward)
 }
 
 // Start the Notifier engine, thus reading the Journal and sending notifications through the bot

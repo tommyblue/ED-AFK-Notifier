@@ -54,6 +54,7 @@ func bountyEvent(e *Notifier, j journalEvent) error {
 	e.killedPirates++
 
 	log.Println("Pirates killed:", e.killedPirates)
+	log.Println("Total bounty rewards:", e.totalPiratesReward)
 
 	if !e.cfg.KillsNotifs {
 		return nil
