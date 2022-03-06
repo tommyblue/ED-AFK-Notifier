@@ -11,13 +11,15 @@ import (
 )
 
 type journalEvent struct {
-	Timestamp   time.Time `json:"timestamp"`
-	Event       string    `json:"event"`
-	Health      float64   `json:"Health"`
-	PlayerPilot bool      `json:"PlayerPilot"`
-	Fighter     bool      `json:"Fighter"`
-	ShieldsUp   bool      `json:"ShieldsUp"`   // whether shields are up or down
-	TotalReward int       `json:"TotalReward"` // total credits earned
+	Timestamp          time.Time `json:"timestamp"`
+	Event              string    `json:"event"`
+	Health             float64   `json:"Health"`
+	PlayerPilot        bool      `json:"PlayerPilot"`
+	Fighter            bool      `json:"Fighter"`
+	ShieldsUp          bool      `json:"ShieldsUp"`   // whether shields are up or down
+	TotalPiratesReward int       `json:"TotalReward"` // total credits earned by killing pirates
+	MissionID          int       `json:"MissionID"`
+	MissionReward      int       `json:"Reward"` // credits earned by completing a mission
 }
 
 func journalPath(logPath string) (string, error) {
@@ -53,6 +55,8 @@ func journalPath(logPath string) (string, error) {
 	if lastMod.IsZero() || lastFile.Name() == "" {
 		return "", fmt.Errorf("cannot find the journal file")
 	}
+
+	log.Println("Found journal file:", lastFile.Name())
 
 	return filepath.Join(logPath, lastFile.Name()), nil
 }

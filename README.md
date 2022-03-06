@@ -14,6 +14,7 @@ Send telegram messages on:
 * Ship shields going down/up
 * Ship hull damages
 * Ship destroyed
+* All missions are completed
 * Fighter hull damage (optional)
 * Total earned credits and pirates destroyed (optional)
 

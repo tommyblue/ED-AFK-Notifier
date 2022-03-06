@@ -47,5 +47,6 @@ func logConfig(cfg *notifier.Cfg) {
 	log.Printf("Config:")
 	log.Printf("  Notify fighter status: %t", cfg.FighterNotifs)
 	log.Printf("  Notify shields status: %t", cfg.ShieldsNotifs)
+	log.Printf("  Notify on kills: %t (silent: %t)", cfg.KillsNotifs, cfg.KillsSilentNotifs)
 	log.Printf("  Journal file path: %s", cfg.JournalPath)
 }
