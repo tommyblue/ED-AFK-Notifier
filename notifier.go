@@ -12,17 +12,22 @@ import (
 )
 
 type Notifier struct {
-	bot         bots.Bot
-	journalFile string
-	cfg         *Cfg
+	bot            bots.Bot
+	journalFile    string
+	cfg            *Cfg
+	totalReward    int
+	killedPirates  int
+	activeMissions int
 }
 
 type Cfg struct {
-	Token         string
-	ChannelId     int64
-	JournalPath   string
-	FighterNotifs bool
-	ShieldsNotifs bool // notify about shields state
+	Token             string
+	ChannelId         int64
+	JournalPath       string
+	FighterNotifs     bool
+	ShieldsNotifs     bool // notify about shields state
+	KillsNotifs       bool // notify about killed pirates
+	KillsSilentNotifs bool // reduce number of notifications for killed pirates, sending a notification every 10 kills
 }
 
 // New returns a Notifier with provided configuration
@@ -61,6 +66,7 @@ func (e *Notifier) Start() error {
 		"HullDamage":  hullDamageEvent,
 		"Died":        diedEvent,
 		"ShieldState": shieldStateEvent,
+		"Bounty":      bountyEvent,
 	}
 
 	for line := range t.Lines {

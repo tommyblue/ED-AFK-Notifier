@@ -4,6 +4,8 @@
     debug = false # Print a log line for each new line in the journal file
     fighter = false # When true, send notification also for hull damage to the fighter
     shields = true # When true, send notification when shields state changes (up/down)
+    kills = true # When true, send notification on each new kill, including total reward earned (noisy!)
+    silent_kills = true # When true, reduce noise for kill notification, sending a notification every 10 kills
 
 [telegram]
     token = "<bot token>" # Create a telegram bot using BotFather

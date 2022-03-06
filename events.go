@@ -47,3 +47,20 @@ func shieldStateEvent(e *Notifier, j journalEvent) error {
 
 	return nil
 }
+
+func bountyEvent(e *Notifier, j journalEvent) error {
+	if !e.cfg.KillsNotifs {
+		return nil
+	}
+
+	e.totalReward += j.TotalReward
+	e.killedPirates++
+
+	if !e.cfg.KillsSilentNotifs || e.killedPirates%10 == 0 {
+		if err := e.bot.Send(fmt.Sprintf("Total rewards: %d credits\nPirates killed: %d", e.totalReward, e.killedPirates)); err != nil {
+			return fmt.Errorf("error sending message: %v", err)
+		}
+	}
+
+	return nil
+}

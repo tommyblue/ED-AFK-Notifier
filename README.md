@@ -7,6 +7,16 @@ The tool monitors the game [journal file](http://edcodex.info/?m=doc) for
 hull damages and, in that case, immediately sends a
 [Telegram](https://telegram.org/) message to alert the Commander.
 
+## Features
+
+Send telegram messages on:
+
+* Ship shields going down/up
+* Ship hull damages
+* Ship destroyed
+* Fighter hull damage (optional)
+* Total earned credits and pirates destroyed (optional)
+
 ## Usage
 
 [Download the binary](https://github.com/tommyblue/ED-AFK-Notifier/releases) for your operating system
@@ -30,6 +40,8 @@ version of the config file):
     debug = false # Print a log line for each new line in the journal file
     fighter = false # When true, send notification also for hull damage to the fighter
     shields = true # When true, send notification when shields state changes (up/down)
+    kills = true # When true, send notification on each new kill, including total reward earned (noisy!)
+    silent_kills = true # When true, reduce noise for kill notification, sending a notification every 10 kills
 
 [telegram]
     token = "<bot token>"

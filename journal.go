@@ -16,7 +16,8 @@ type journalEvent struct {
 	Health      float64   `json:"Health"`
 	PlayerPilot bool      `json:"PlayerPilot"`
 	Fighter     bool      `json:"Fighter"`
-	ShieldsUp   bool      `json:"ShieldsUp"` // whether shields are up or down
+	ShieldsUp   bool      `json:"ShieldsUp"`   // whether shields are up or down
+	TotalReward int       `json:"TotalReward"` // total credits earned
 }
 
 func journalPath(logPath string) (string, error) {

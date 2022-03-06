@@ -13,11 +13,13 @@ func main() {
 	}
 
 	cfg := &notifier.Cfg{
-		Token:         viper.GetString("telegram.token"),
-		ChannelId:     viper.GetInt64("telegram.channelId"),
-		JournalPath:   viper.GetString("journal.path"),
-		FighterNotifs: viper.GetBool("journal.fighter"),
-		ShieldsNotifs: viper.GetBool("journal.shields"),
+		Token:             viper.GetString("telegram.token"),
+		ChannelId:         viper.GetInt64("telegram.channelId"),
+		JournalPath:       viper.GetString("journal.path"),
+		FighterNotifs:     viper.GetBool("journal.fighter"),
+		ShieldsNotifs:     viper.GetBool("journal.shields"),
+		KillsNotifs:       viper.GetBool("journal.kills"),
+		KillsSilentNotifs: viper.GetBool("journal.silent_kills"),
 	}
 
 	logConfig(cfg)
