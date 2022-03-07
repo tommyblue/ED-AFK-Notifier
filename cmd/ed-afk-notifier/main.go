@@ -30,9 +30,7 @@ func main() {
 		log.Fatalf("Cannot initialize the notifier: %v", err)
 	}
 
-	if err := notifier.Start(); err != nil {
-		log.Fatal(err)
-	}
+	notifier.Start()
 }
 
 func setupConfig() error {

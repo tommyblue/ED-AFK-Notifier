@@ -77,7 +77,7 @@ func Test_hullDamageEvent(t *testing.T) {
 				err: tt.sendErr,
 			}
 
-			err := hullDamageEvent(tt.n, tt.j)
+			err := hullDamageEvent(tt.n, tt.j, false)
 
 			if err != nil {
 				if tt.sendErr == nil {
@@ -131,7 +131,7 @@ func Test_diedEvent(t *testing.T) {
 				err: tt.sendErr,
 			}
 
-			err := diedEvent(tt.n, tt.j)
+			err := diedEvent(tt.n, tt.j, false)
 
 			if err != nil {
 				if tt.sendErr == nil {

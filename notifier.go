@@ -19,6 +19,7 @@ import (
 type Notifier struct {
 	bot                 bots.Bot
 	journalFile         string
+	journalChanged      chan struct{}
 	cfg                 *Cfg
 	totalPiratesReward  int
 	killedPirates       int
@@ -53,11 +54,11 @@ func New(cfg *Cfg) (*Notifier, error) {
 	e := &Notifier{
 		bot:            bot,
 		journalFile:    filepath.Join(cfg.JournalPath, j),
+		journalChanged: make(chan struct{}),
 		cfg:            cfg,
-		loggedMissions: make(map[int]bool),
 	}
 
-	e.initMissions()
+	e.initNotifier()
 
 	e.watchJournal()
 
@@ -66,7 +67,7 @@ func New(cfg *Cfg) (*Notifier, error) {
 
 func (e *Notifier) watchJournal() {
 	go func() {
-		for range time.Tick(3 * time.Minute) {
+		for range time.Tick(30 * time.Second) {
 
 			oldJournal := e.journalFile
 			j, err := journalFile(e.cfg.JournalPath)
@@ -78,13 +79,23 @@ func (e *Notifier) watchJournal() {
 				log.Println("Found new journal file:", j)
 				e.journalFile = filepath.Join(e.cfg.JournalPath, j)
 
-				e.initMissions()
+				e.initNotifier()
+
+				e.journalChanged <- struct{}{}
 			}
 		}
 	}()
 }
 
-func (e *Notifier) initMissions() {
+func (e *Notifier) initNotifier() {
+	log.Println("Initializing...")
+
+	e.totalPiratesReward = 0
+	e.killedPirates = 0
+	e.activeMissions = 0
+	e.loggedMissions = make(map[int]bool)
+	e.totalMissionsReward = 0
+
 	file, err := os.Open(e.journalFile)
 	if err != nil {
 		log.Fatal(err)
@@ -96,6 +107,7 @@ func (e *Notifier) initMissions() {
 		var j struct {
 			Active []struct {
 				MissionID int `json:"MissionID"`
+				Expires   int `json:"Expires"`
 			} `json:"Active"` // contains active missions, logged at login
 			Event       string `json:"event"`
 			MissionID   int    `json:"MissionID"`
@@ -109,9 +121,10 @@ func (e *Notifier) initMissions() {
 
 		switch j.Event {
 		case "Missions":
-			e.activeMissions = len(j.Active)
-
 			for _, m := range j.Active {
+				if m.Expires != 0 {
+					e.activeMissions++
+				}
 				e.loggedMissions[m.MissionID] = false
 			}
 
@@ -155,51 +168,62 @@ func (e *Notifier) initMissions() {
 	if e.totalPiratesReward > 0 {
 		log.Printf("Obtained reward for killed pirates (%d) until now: %s", e.killedPirates, p.Sprintf("%d", e.totalPiratesReward))
 	}
+
+	log.Println("Initialization completed.")
 }
 
 // Start the Notifier engine, thus reading the Journal and sending notifications through the bot
-func (e *Notifier) Start() error {
+func (e *Notifier) Start() {
 	e.bot.Start()
 
-	t, err := tail.TailFile(e.journalFile, tail.Config{Follow: true, Poll: true})
-	if err != nil {
-		return fmt.Errorf("cannot tail the log file: %v", err)
-	}
-
-	startTime := time.Now()
-
-	events := map[string]eventFn{
-		"HullDamage":        hullDamageEvent,
-		"Died":              diedEvent,
-		"ShieldState":       shieldStateEvent,
-		"Bounty":            bountyEvent,
-		"MissionAccepted":   missionAcceptedEvent,
-		"MissionCompleted":  missionCompletedEvent,
-		"MissionRedirected": missionRedirectedEvent,
-		"MissionAbandoned":  missionAbandonedEvent,
-	}
-
-	for line := range t.Lines {
-		var j journalEvent
-		if err := json.Unmarshal([]byte(line.Text), &j); err != nil {
-			log.Printf("Cannot unmarshal %s", line.Text)
+	for {
+		log.Println("Reading journal...")
+		t, err := tail.TailFile(e.journalFile, tail.Config{Follow: true, Poll: true})
+		if err != nil {
+			log.Fatalf("cannot tail the log file: %v\n", err)
 		}
 
-		// Skip logs already in the journal befor this app has started
-		if j.Timestamp.Before(startTime) {
-			continue
+		go func() {
+			<-e.journalChanged
+			log.Println("Journal changed, reloading...")
+			t.Stop()
+		}()
+
+		startTime := time.Now()
+
+		events := map[string]eventFn{
+			"HullDamage":        hullDamageEvent,
+			"Died":              diedEvent,
+			"ShieldState":       shieldStateEvent,
+			"Bounty":            bountyEvent,
+			"MissionAccepted":   missionAcceptedEvent,
+			"MissionCompleted":  missionCompletedEvent,
+			"MissionRedirected": missionRedirectedEvent,
+			"MissionAbandoned":  missionAbandonedEvent,
+			"Missions":          missionsInitEvent,
 		}
 
-		if viper.GetBool("journal.debug") {
-			log.Println(line.Text)
-		}
+		for line := range t.Lines {
+			var j journalEvent
+			if err := json.Unmarshal([]byte(line.Text), &j); err != nil {
+				log.Printf("Cannot unmarshal %s", line.Text)
+			}
 
-		if fn, ok := events[j.Event]; ok {
-			if err := fn(e, j); err != nil {
-				log.Println(err)
+			// Skip logs already in the journal befor this app has started
+			var skipNotify bool
+			if j.Timestamp.Before(startTime) {
+				skipNotify = true
+			}
+
+			if viper.GetBool("journal.debug") {
+				log.Println(line.Text)
+			}
+
+			if fn, ok := events[j.Event]; ok {
+				if err := fn(e, j, skipNotify); err != nil {
+					log.Println(err)
+				}
 			}
 		}
 	}
-
-	return nil
 }
