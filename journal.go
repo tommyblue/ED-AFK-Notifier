@@ -3,10 +3,11 @@ package notifier
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type journalEvent struct {
@@ -41,7 +42,7 @@ func journalFile(logPath string) (string, error) {
 
 		finfo, err := file.Info()
 		if err != nil {
-			log.Printf("cannot get info for %s", file.Name())
+			log.Infof("cannot get info for %s", file.Name())
 			continue
 		}
 
@@ -56,4 +57,12 @@ func journalFile(logPath string) (string, error) {
 	}
 
 	return lastFile.Name(), nil
+}
+
+func (j *journalEvent) printLog(v ...interface{}) {
+	if j.Timestamp.Before(time.Now()) {
+		return
+	}
+
+	log.Infoln(v...)
 }

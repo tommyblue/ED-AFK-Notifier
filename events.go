@@ -2,8 +2,9 @@ package notifier
 
 import (
 	"fmt"
-	"log"
 	"math"
+
+	log "github.com/sirupsen/logrus"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -57,11 +58,11 @@ func bountyEvent(e *Notifier, j journalEvent, skipNotify bool) error {
 	e.totalPiratesReward += j.TotalPiratesReward
 	e.killedPirates++
 
-	log.Println("Pirates killed:", e.killedPirates)
+	j.printLog("Pirates killed:", e.killedPirates)
 
 	p := message.NewPrinter(language.Make("en"))
 	bounties := p.Sprintf("%d", e.totalPiratesReward)
-	log.Println("Total bounty rewards:", bounties)
+	j.printLog("Total bounty rewards:", bounties)
 
 	if !e.cfg.KillsNotifs {
 		return nil
@@ -78,7 +79,7 @@ func missionAcceptedEvent(e *Notifier, j journalEvent, skipNotify bool) error {
 	e.activeMissions++
 	e.loggedMissions[j.MissionID] = false
 
-	log.Println("Active missions:", e.activeMissions)
+	j.printLog("Active missions:", e.activeMissions)
 
 	return nil
 }
@@ -91,7 +92,7 @@ func missionRedirectedEvent(e *Notifier, j journalEvent, skipNotify bool) error 
 	e.activeMissions--
 	e.loggedMissions[j.MissionID] = true
 
-	log.Println("Active missions:", e.activeMissions)
+	j.printLog("Active missions:", e.activeMissions)
 
 	if e.activeMissions == 0 {
 		return e.notify("No more active missions, go collect new ones!", skipNotify)
@@ -109,9 +110,9 @@ func missionCompletedEvent(e *Notifier, j journalEvent, skipNotify bool) error {
 	delete(e.loggedMissions, j.MissionID)
 
 	e.totalMissionsReward += j.MissionReward
-	log.Println("Obtained reward for missions until now:", e.totalMissionsReward)
+	j.printLog("Obtained reward for missions until now:", e.totalMissionsReward)
 
-	log.Println("Active missions:", e.activeMissions)
+	j.printLog("Active missions:", e.activeMissions)
 
 	if e.activeMissions == 0 {
 		return e.notify("No more active missions, go collect new ones!", skipNotify)
@@ -128,7 +129,7 @@ func missionAbandonedEvent(e *Notifier, j journalEvent, skipNotify bool) error {
 }
 
 func missionsInitEvent(e *Notifier, j journalEvent, skipNotify bool) error {
-	log.Println("Found missions log message, starting new initialization")
+	log.Infoln("Found missions log message, running new initialization")
 	e.initNotifier()
 
 	return nil

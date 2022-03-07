@@ -1,11 +1,18 @@
 package main
 
 import (
-	"log"
+	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	notifier "github.com/tommyblue/ED-AFK-Notifier"
 )
+
+func init() {
+	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.InfoLevel)
+}
 
 func main() {
 	if err := setupConfig(); err != nil {
@@ -20,6 +27,10 @@ func main() {
 		ShieldsNotifs:     viper.GetBool("journal.shields"),
 		KillsNotifs:       viper.GetBool("journal.kills"),
 		KillsSilentNotifs: viper.GetBool("journal.silent_kills"),
+	}
+
+	if viper.GetBool("journal.debug") {
+		log.SetLevel(log.DebugLevel)
 	}
 
 	logConfig(cfg)
@@ -42,9 +53,9 @@ func setupConfig() error {
 }
 
 func logConfig(cfg *notifier.Cfg) {
-	log.Printf("Config:")
-	log.Printf("  Notify fighter status: %t", cfg.FighterNotifs)
-	log.Printf("  Notify shields status: %t", cfg.ShieldsNotifs)
-	log.Printf("  Notify on kills: %t (silent: %t)", cfg.KillsNotifs, cfg.KillsSilentNotifs)
-	log.Printf("  Journal file path: %s", cfg.JournalPath)
+	log.Infof("Config:")
+	log.Infof("  Notify fighter status: %t", cfg.FighterNotifs)
+	log.Infof("  Notify shields status: %t", cfg.ShieldsNotifs)
+	log.Infof("  Notify on kills: %t (silent: %t)", cfg.KillsNotifs, cfg.KillsSilentNotifs)
+	log.Infof("  Journal file path: %s", cfg.JournalPath)
 }

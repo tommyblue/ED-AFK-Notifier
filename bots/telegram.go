@@ -2,10 +2,10 @@ package bots
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	log "github.com/sirupsen/logrus"
 )
 
 type Telegram struct {
@@ -54,7 +54,7 @@ func (bot *Telegram) Start() {
 				}
 
 				if err := bot.rawSend(msg); err != nil {
-					log.Printf("Error sending message: %v", err)
+					log.Errorf("Error sending message: %v", err)
 				}
 			}
 		}
