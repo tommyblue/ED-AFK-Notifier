@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"math"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type eventFn func(*Notifier, journalEvent) error
@@ -54,14 +57,17 @@ func bountyEvent(e *Notifier, j journalEvent) error {
 	e.killedPirates++
 
 	log.Println("Pirates killed:", e.killedPirates)
-	log.Println("Total bounty rewards:", e.totalPiratesReward)
+
+	p := message.NewPrinter(language.Make("en"))
+	bounties := p.Sprintf("%d", e.totalPiratesReward)
+	log.Println("Total bounty rewards:", bounties)
 
 	if !e.cfg.KillsNotifs {
 		return nil
 	}
 
 	if !e.cfg.KillsSilentNotifs || e.killedPirates%10 == 0 {
-		if err := e.bot.Send(fmt.Sprintf("Total rewards: %d credits\nPirates killed: %d", e.totalPiratesReward, e.killedPirates)); err != nil {
+		if err := e.bot.Send(fmt.Sprintf("Total rewards: %s credits\nPirates killed: %d", bounties, e.killedPirates)); err != nil {
 			return fmt.Errorf("error sending message: %v", err)
 		}
 	}

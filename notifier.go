@@ -12,6 +12,8 @@ import (
 	"github.com/hpcloud/tail"
 	"github.com/spf13/viper"
 	"github.com/tommyblue/ED-AFK-Notifier/bots"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type Notifier struct {
@@ -145,8 +147,14 @@ func (e *Notifier) initMissions() {
 	}
 
 	log.Println("Active missions:", e.activeMissions)
-	log.Println("Obtained reward for missions until now:", e.totalMissionsReward)
-	log.Println("Obtained reward for killed pirates (", e.killedPirates, ") until now:", e.totalPiratesReward)
+	p := message.NewPrinter(language.Make("en"))
+	if e.totalMissionsReward > 0 {
+		log.Println("Obtained reward for missions until now:", p.Sprintf("%f", e.totalMissionsReward))
+	}
+
+	if e.totalPiratesReward > 0 {
+		log.Printf("Obtained reward for killed pirates (%d) until now: %s", e.killedPirates, p.Sprintf("%d", e.totalPiratesReward))
+	}
 }
 
 // Start the Notifier engine, thus reading the Journal and sending notifications through the bot
