@@ -103,16 +103,18 @@ func (e *Notifier) initNotifier() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	var lastMissionsTs time.Time
 	for scanner.Scan() {
 		var j struct {
 			Active []struct {
 				MissionID int `json:"MissionID"`
 				Expires   int `json:"Expires"`
 			} `json:"Active"` // contains active missions, logged at login
-			Event       string `json:"event"`
-			MissionID   int    `json:"MissionID"`
-			Reward      int    `json:"Reward"`
-			TotalReward int    `json:"TotalReward"`
+			Event       string    `json:"event"`
+			MissionID   int       `json:"MissionID"`
+			Reward      int       `json:"Reward"`
+			TotalReward int       `json:"TotalReward"`
+			Timestamp   time.Time `json:"timestamp"`
 		}
 		line := scanner.Text()
 		if err := json.Unmarshal([]byte(line), &j); err != nil {
@@ -120,17 +122,29 @@ func (e *Notifier) initNotifier() {
 		}
 
 		switch j.Event {
+		case "Bounty":
+			e.totalPiratesReward += j.TotalReward
+			e.killedPirates++
 		case "Missions":
+			lastMissionsTs = j.Timestamp
+			e.activeMissions = 0
 			for _, m := range j.Active {
 				if m.Expires != 0 {
 					e.activeMissions++
 				}
-				e.loggedMissions[m.MissionID] = false
 			}
 
+		// The following actions must be accepted only if their timestamp is newer the last
+		// "Missions" event or the missions count will be wrong.
 		case "MissionAccepted":
+			if j.Timestamp.After(lastMissionsTs) {
+				continue
+			}
 			e.activeMissions++
 		case "MissionRedirected":
+			if j.Timestamp.After(lastMissionsTs) {
+				continue
+			}
 			if e.loggedMissions[j.MissionID] {
 				continue
 			}
@@ -138,6 +152,9 @@ func (e *Notifier) initNotifier() {
 			e.activeMissions--
 			e.loggedMissions[j.MissionID] = true
 		case "MissionCompleted":
+			if j.Timestamp.After(lastMissionsTs) {
+				continue
+			}
 			if e.loggedMissions[j.MissionID] {
 				continue
 			}
@@ -147,11 +164,11 @@ func (e *Notifier) initNotifier() {
 
 			e.totalMissionsReward += j.Reward
 		case "MissionAbandoned":
+			if j.Timestamp.After(lastMissionsTs) {
+				continue
+			}
 			e.activeMissions--
 			delete(e.loggedMissions, j.MissionID)
-		case "Bounty":
-			e.totalPiratesReward += j.TotalReward
-			e.killedPirates++
 		}
 	}
 
