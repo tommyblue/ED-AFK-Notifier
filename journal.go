@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -22,7 +21,7 @@ type journalEvent struct {
 	MissionReward      int       `json:"Reward"` // credits earned by completing a mission
 }
 
-func journalPath(logPath string) (string, error) {
+func journalFile(logPath string) (string, error) {
 	files, err := os.ReadDir(logPath)
 	if err != nil {
 		return "", err
@@ -56,7 +55,5 @@ func journalPath(logPath string) (string, error) {
 		return "", fmt.Errorf("cannot find the journal file")
 	}
 
-	log.Println("Found journal file:", lastFile.Name())
-
-	return filepath.Join(logPath, lastFile.Name()), nil
+	return lastFile.Name(), nil
 }

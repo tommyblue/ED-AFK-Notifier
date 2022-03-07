@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/hpcloud/tail"
@@ -41,21 +42,44 @@ func New(cfg *Cfg) (*Notifier, error) {
 		return nil, fmt.Errorf("cannot setup the Telegram bot: %v", err)
 	}
 
-	j, err := journalPath(cfg.JournalPath)
+	j, err := journalFile(cfg.JournalPath)
 	if err != nil {
 		return nil, err
 	}
+	log.Println("Found most recent journal file:", j)
 
 	e := &Notifier{
 		bot:            bot,
-		journalFile:    j,
+		journalFile:    filepath.Join(cfg.JournalPath, j),
 		cfg:            cfg,
 		loggedMissions: make(map[int]bool),
 	}
 
 	e.initMissions()
 
+	e.watchJournal()
+
 	return e, nil
+}
+
+func (e *Notifier) watchJournal() {
+	go func() {
+		for range time.Tick(3 * time.Minute) {
+
+			oldJournal := e.journalFile
+			j, err := journalFile(e.cfg.JournalPath)
+			if err != nil {
+				continue
+			}
+
+			if oldJournal != filepath.Join(e.cfg.JournalPath, j) {
+				log.Println("Found new journal file:", j)
+				e.journalFile = filepath.Join(e.cfg.JournalPath, j)
+
+				e.initMissions()
+			}
+		}
+	}()
 }
 
 func (e *Notifier) initMissions() {
