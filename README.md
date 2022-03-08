@@ -45,7 +45,7 @@ After some AFK rounds your reputation with parties will be very high and they'll
 So, with 20 missions the total reward is around 600M + the bounties (30 to 60 million in my experience).
 
 With a fully engineered T10 and a deadly/elite fighter, it takes around 4/6 hours to complete all 20 missions,
-which means it's very easy to gain around 1.5 billion per day (with 3 AFK rounds per day).
+which means it's very easy to gain around **1.5 billion per day** (with 3 AFK rounds per day).
 
 ## Features
 
