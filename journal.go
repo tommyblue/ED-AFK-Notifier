@@ -60,7 +60,7 @@ func journalFile(logPath string) (string, error) {
 }
 
 func (j *journalEvent) printLog(v ...interface{}) {
-	if j.Timestamp.Before(time.Now()) {
+	if j.Timestamp.Add(10 * time.Second).Before(time.Now()) {
 		return
 	}
 
