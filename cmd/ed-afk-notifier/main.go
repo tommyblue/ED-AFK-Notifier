@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/widget"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	notifier "github.com/tommyblue/ED-AFK-Notifier"
@@ -41,7 +43,37 @@ func main() {
 		log.Fatalf("Cannot initialize the notifier: %v", err)
 	}
 
-	notifier.Start()
+	go notifier.Start()
+	gui()
+}
+
+func gui() {
+	a := app.NewWithID("io.github.tommyblue.ed-afk-notifier.preferences")
+	w := a.NewWindow("ED AFK Notifier")
+	w.SetMaster()
+	w.SetContent(widget.NewLabel("Hello"))
+	w.SetContent(widget.NewButton("Open config", func() {
+		w3 := a.NewWindow("Config")
+		var debug bool
+
+		timeoutSelector := widget.NewRadioGroup([]string{"On", "Off"}, func(selected string) {
+			switch selected {
+			case "On":
+				debug = true
+			case "Off":
+				debug = false
+			}
+
+			a.Preferences().SetString("EnableDebug", selected)
+			viper.Set("journal.debug", debug)
+		})
+
+		timeoutSelector.SetSelected(a.Preferences().StringWithFallback("EnableDebug", "Off"))
+		w3.SetContent(timeoutSelector)
+		w3.Show()
+	}))
+	w.Show()
+	a.Run()
 }
 
 func setupConfig() error {
