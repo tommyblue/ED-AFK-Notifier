@@ -3,7 +3,7 @@ module github.com/tommyblue/ED-AFK-Notifier
 go 1.18
 
 require (
-	fyne.io/fyne/v2 v2.1.3
+	fyne.io/fyne/v2 v2.1.4
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/hpcloud/tail v1.0.0
 	github.com/sirupsen/logrus v1.8.1

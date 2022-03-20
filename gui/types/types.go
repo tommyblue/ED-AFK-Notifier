@@ -13,6 +13,9 @@ type GUI struct {
 }
 
 const (
+	CONFIG_JOURNAL_PATH        = "journal.path"
+	CONFIG_BOT_TOKEN           = "bot.token"
+	CONFIG_BOT_CHANNEL_ID      = "bot.channelId"
 	CONFIG_LOG_DEBUG           = "log.debug"
 	CONFIG_NOTIFY_SHIELDS      = "notify.shields"
 	CONFIG_NOTIFY_FIGHTER      = "notify.fighter"

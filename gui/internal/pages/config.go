@@ -10,14 +10,25 @@ import (
 	"github.com/tommyblue/ED-AFK-Notifier/gui/types"
 )
 
-type getPref func() bool
+type preference struct {
+	key   string
+	vtype string
+}
 
-var preferences = []string{
-	types.CONFIG_LOG_DEBUG,
-	types.CONFIG_NOTIFY_SHIELDS,
-	types.CONFIG_NOTIFY_FIGHTER,
-	types.CONFIG_NOTIFY_KILLS,
-	types.CONFIG_NOTIFY_SILENT_KILLS,
+const (
+	TYPE_BOOL = "bool"
+	TYPE_STR  = "string"
+)
+
+var preferences = []preference{
+	{key: types.CONFIG_JOURNAL_PATH, vtype: TYPE_STR},
+	{key: types.CONFIG_BOT_TOKEN, vtype: TYPE_STR},
+	{key: types.CONFIG_BOT_CHANNEL_ID, vtype: TYPE_STR},
+	{key: types.CONFIG_LOG_DEBUG, vtype: TYPE_BOOL},
+	{key: types.CONFIG_NOTIFY_SHIELDS, vtype: TYPE_BOOL},
+	{key: types.CONFIG_NOTIFY_FIGHTER, vtype: TYPE_BOOL},
+	{key: types.CONFIG_NOTIFY_KILLS, vtype: TYPE_BOOL},
+	{key: types.CONFIG_NOTIFY_SILENT_KILLS, vtype: TYPE_BOOL},
 }
 
 func Config(g *types.GUI) func() {
@@ -26,9 +37,16 @@ func Config(g *types.GUI) func() {
 
 		undo := func() {
 			for _, pref := range preferences {
-				v := viper.GetBool(pref)
-				log.Debugln("Restoring preference:", pref, "=>", v)
-				g.App.Preferences().SetBool(pref, v)
+				switch pref.vtype {
+				case TYPE_BOOL:
+					v := viper.GetBool(pref.key)
+					log.Debugln("Restoring preference:", pref, "=>", v)
+					g.App.Preferences().SetBool(pref.key, v)
+				case TYPE_STR:
+					v := viper.GetString(pref.key)
+					log.Debugln("Restoring preference:", pref, "=>", v)
+					g.App.Preferences().SetString(pref.key, v)
+				}
 			}
 		}
 
@@ -41,16 +59,25 @@ func Config(g *types.GUI) func() {
 				w.Close()
 			},
 			OnSubmit: func() {
-				log.Debugln("Config form submitted")
 				for _, pref := range preferences {
-					v := g.App.Preferences().Bool(pref)
-					log.Debugln("Saving preference:", pref, "=>", v)
-					viper.Set(pref, v)
+					switch pref.vtype {
+					case TYPE_BOOL:
+						v := g.App.Preferences().Bool(pref.key)
+						log.Debugln("Saving preference:", pref, "=>", v)
+						viper.Set(pref.key, v)
+					case TYPE_STR:
+						v := g.App.Preferences().String(pref.key)
+						log.Debugln("Saving preference:", pref, "=>", v)
+						viper.Set(pref.key, v)
+					}
 				}
 				w.Close()
 			},
 		}
 
+		form.Append("Journal path", components.FolderSelector(g, types.CONFIG_JOURNAL_PATH))
+		form.Append("Telegram bot token", components.TextField(g, types.CONFIG_BOT_TOKEN, "Insert your bot token here"))
+		form.Append("Telegram bot channel ID", components.TextField(g, types.CONFIG_BOT_CHANNEL_ID, "Insert your bot channel ID here"))
 		form.Append("Enable Debug", components.BoolSelector(g, types.CONFIG_LOG_DEBUG, nil))
 		form.Append("Shields status", components.BoolSelector(g, types.CONFIG_NOTIFY_SHIELDS, nil))
 		form.Append("Fighter status", components.BoolSelector(g, types.CONFIG_NOTIFY_FIGHTER, nil))
