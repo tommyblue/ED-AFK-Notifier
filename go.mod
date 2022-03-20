@@ -8,7 +8,7 @@ require (
 	github.com/hpcloud/tail v1.0.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.7.1
-	golang.org/x/text v0.3.3
+	golang.org/x/text v0.3.7
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/yuin/goldmark v1.3.8 // indirect
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8 // indirect
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/ini.v1 v1.51.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
