@@ -1,11 +1,6 @@
-package types
+package notifier
 
 import "fyne.io/fyne/v2"
-
-type Config struct {
-	AppName string
-	Debug   bool
-}
 
 type GUI struct {
 	App        fyne.App

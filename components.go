@@ -1,4 +1,4 @@
-package components
+package notifier
 
 import (
 	"fmt"
@@ -10,11 +10,10 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	log "github.com/sirupsen/logrus"
-	"github.com/tommyblue/ED-AFK-Notifier/gui/types"
 )
 
 // BoolSelector creates a On/Off selector. The label is used to store the value in the config env.
-func BoolSelector(g *types.GUI, label string, v binding.Bool) fyne.CanvasObject {
+func BoolSelector(g *GUI, label string, v binding.Bool) fyne.CanvasObject {
 	if v == nil {
 		v = binding.NewBool()
 	}
@@ -44,7 +43,7 @@ func BoolSelector(g *types.GUI, label string, v binding.Bool) fyne.CanvasObject 
 	return selector
 }
 
-func FolderSelector(g *types.GUI, label string) fyne.CanvasObject {
+func FolderSelector(g *GUI, label string) fyne.CanvasObject {
 	w := g.App.NewWindow(fmt.Sprintf("folder_selector.%s", label))
 
 	path := g.App.Preferences().StringWithFallback(label, "")
@@ -86,7 +85,7 @@ func FolderSelector(g *types.GUI, label string) fyne.CanvasObject {
 	return content
 }
 
-func TextField(g *types.GUI, label, placeholder string) fyne.CanvasObject {
+func TextField(g *GUI, label, placeholder string) fyne.CanvasObject {
 	input := widget.NewEntry()
 	input.SetPlaceHolder(placeholder)
 

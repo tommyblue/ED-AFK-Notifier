@@ -25,7 +25,7 @@ func (e *Notifier) notify(msg string, skipNotify bool) error {
 }
 
 func hullDamageEvent(e *Notifier, j journalEvent, skipNotify bool) error {
-	if j.Fighter && !e.cfg.FighterNotifs {
+	if j.Fighter && !e.configBool(CONFIG_NOTIFY_FIGHTER) {
 		return nil
 	}
 
@@ -64,11 +64,11 @@ func bountyEvent(e *Notifier, j journalEvent, skipNotify bool) error {
 	bounties := p.Sprintf("%d", e.totalPiratesReward)
 	j.printLog("Total bounty rewards:", bounties)
 
-	if !e.cfg.KillsNotifs {
+	if !e.configBool(CONFIG_NOTIFY_KILLS) {
 		return nil
 	}
 
-	if !e.cfg.KillsSilentNotifs || e.killedPirates%10 == 0 {
+	if !e.configBool(CONFIG_NOTIFY_SILENT_KILLS) || e.killedPirates%10 == 0 {
 		return e.notify(fmt.Sprintf("Total rewards: %s credits\nPirates killed: %d", bounties, e.killedPirates), skipNotify)
 	}
 
