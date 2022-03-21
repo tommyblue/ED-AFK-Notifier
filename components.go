@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	log "github.com/sirupsen/logrus"
 )
@@ -43,7 +44,7 @@ func BoolSelector(g *GUI, label string, v binding.Bool) fyne.CanvasObject {
 	return selector
 }
 
-func FolderSelector(g *GUI, label string) fyne.CanvasObject {
+func FolderSelector(g *GUI, label, location string) fyne.CanvasObject {
 	w := g.App.NewWindow(fmt.Sprintf("folder_selector.%s", label))
 
 	path := g.App.Preferences().StringWithFallback(label, "")
@@ -74,6 +75,14 @@ func FolderSelector(g *GUI, label string) fyne.CanvasObject {
 		dlg.SetOnClosed(func() {
 			w.Hide()
 		})
+		// TODO: close window on cancel
+		if location != "" {
+			lister, err := storage.ListerForURI(storage.NewFileURI(location))
+			if err == nil {
+				dlg.SetLocation(lister)
+			}
+		}
+
 		dlg.Resize(fyne.NewSize(800, 600))
 		dlg.Show()
 		w.Resize(fyne.NewSize(800, 600))

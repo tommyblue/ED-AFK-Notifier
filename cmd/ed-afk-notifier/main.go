@@ -14,7 +14,8 @@ func init() {
 }
 
 func main() {
-	notifier, err := notifier.New()
+	stopCh := make(chan struct{})
+	notifier, err := notifier.New(stopCh)
 	if err != nil {
 		log.Fatalf("Cannot initialize the notifier: %v", err)
 	}
@@ -22,4 +23,5 @@ func main() {
 	notifier.LogConfig()
 
 	notifier.Start()
+	close(stopCh)
 }

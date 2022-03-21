@@ -74,6 +74,9 @@ github.com/godbus/dbus/v5
 github.com/goki/freetype
 github.com/goki/freetype/raster
 github.com/goki/freetype/truetype
+# github.com/google/uuid v1.3.0
+## explicit
+github.com/google/uuid
 # github.com/hpcloud/tail v1.0.0
 ## explicit
 github.com/hpcloud/tail
