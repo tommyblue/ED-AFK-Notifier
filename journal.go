@@ -12,7 +12,7 @@ import (
 
 type journalEvent struct {
 	Timestamp          time.Time `json:"timestamp"`
-	Event              string    `json:"event"`
+	Event              eventType `json:"event"`
 	Health             float64   `json:"Health"`
 	PlayerPilot        bool      `json:"PlayerPilot"`
 	Fighter            bool      `json:"Fighter"`
@@ -20,6 +20,10 @@ type journalEvent struct {
 	TotalPiratesReward int       `json:"TotalReward"` // total credits earned by killing pirates
 	MissionID          int       `json:"MissionID"`
 	MissionReward      int       `json:"Reward"` // credits earned by completing a mission
+	Active             []struct {
+		MissionID int `json:"MissionID"`
+		Expires   int `json:"Expires"`
+	} `json:"Active"` // contains active missions, logged at login
 }
 
 func journalFile(logPath string) (string, error) {

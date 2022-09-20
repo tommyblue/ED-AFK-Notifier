@@ -84,12 +84,30 @@ func (e *Notifier) watchJournal() {
 	}()
 }
 
-func (e *Notifier) initNotifier() {
+type eventType string
+
+var (
+	bountyEventType            eventType = "Bounty"
+	missionsEventType          eventType = "Missions"
+	missionAcceptedEventType   eventType = "MissionAccepted"
+	missionRedirectedEventType eventType = "MissionRedirected"
+	missionCompletedEventType  eventType = "MissionCompleted"
+	missionAbandonedEventType  eventType = "MissionAbandoned"
+	hullDamageEventType        eventType = "HullDamage"
+	diedEventType              eventType = "Died"
+	shieldStateEventType       eventType = "ShieldState"
+)
+
+func (e *Notifier) initCounters() {
 	e.totalPiratesReward = 0
 	e.killedPirates = 0
 	e.activeMissions = 0
 	e.loggedMissions = make(map[int]bool)
 	e.totalMissionsReward = 0
+}
+
+func (e *Notifier) initNotifier() {
+	e.initCounters()
 
 	file, err := os.Open(e.journalFile)
 	if err != nil {
@@ -100,17 +118,7 @@ func (e *Notifier) initNotifier() {
 	scanner := bufio.NewScanner(file)
 	var lastMissionsTs time.Time
 	for scanner.Scan() {
-		var j struct {
-			Timestamp time.Time `json:"timestamp"`
-			Active    []struct {
-				MissionID int `json:"MissionID"`
-				Expires   int `json:"Expires"`
-			} `json:"Active"` // contains active missions, logged at login
-			Event       string `json:"event"`
-			MissionID   int    `json:"MissionID"`
-			Reward      int    `json:"Reward"`
-			TotalReward int    `json:"TotalReward"`
-		}
+		var j journalEvent
 
 		line := scanner.Text()
 		if err := json.Unmarshal([]byte(line), &j); err != nil {
@@ -120,10 +128,15 @@ func (e *Notifier) initNotifier() {
 		}
 
 		switch j.Event {
-		case "Bounty":
-			e.totalPiratesReward += j.TotalReward
+
+		case bountyEventType:
+			e.totalPiratesReward += j.TotalPiratesReward
 			e.killedPirates++
-		case "Missions":
+
+			log.Debugf("Total reward: %d\n", e.totalPiratesReward)
+			log.Debugf("Killed pirates: %d\n", e.killedPirates)
+
+		case missionsEventType:
 			lastMissionsTs = j.Timestamp
 			e.activeMissions = 0
 			for _, m := range j.Active {
@@ -132,14 +145,18 @@ func (e *Notifier) initNotifier() {
 				}
 			}
 
+			log.Debugf("Active missions: %d\n", e.activeMissions)
+
 		// The following actions must be accepted only if their timestamp is newer the last
 		// "Missions" event or the missions count will be wrong.
-		case "MissionAccepted":
+		case missionAcceptedEventType:
 			if j.Timestamp.After(lastMissionsTs) {
 				continue
 			}
 			e.activeMissions++
-		case "MissionRedirected":
+			log.Debugf("Active missions: %d\n", e.activeMissions)
+
+		case missionRedirectedEventType:
 			if j.Timestamp.After(lastMissionsTs) {
 				continue
 			}
@@ -149,7 +166,10 @@ func (e *Notifier) initNotifier() {
 
 			e.activeMissions--
 			e.loggedMissions[j.MissionID] = true
-		case "MissionCompleted":
+
+			log.Debugf("Active missions: %d\n", e.activeMissions)
+
+		case missionCompletedEventType:
 			if j.Timestamp.After(lastMissionsTs) {
 				continue
 			}
@@ -160,13 +180,19 @@ func (e *Notifier) initNotifier() {
 			e.activeMissions--
 			delete(e.loggedMissions, j.MissionID)
 
-			e.totalMissionsReward += j.Reward
-		case "MissionAbandoned":
+			e.totalMissionsReward += j.MissionReward
+
+			log.Debugf("Active missions: %d\n", e.activeMissions)
+			log.Debugf("Total missions reward: %d\n", e.totalMissionsReward)
+
+		case missionAbandonedEventType:
 			if j.Timestamp.After(lastMissionsTs) {
 				continue
 			}
 			e.activeMissions--
 			delete(e.loggedMissions, j.MissionID)
+
+			log.Debugf("Active missions: %d\n", e.activeMissions)
 		}
 	}
 
@@ -194,16 +220,16 @@ func (e *Notifier) Start() {
 
 		startTime := time.Now()
 
-		events := map[string]eventFn{
-			"HullDamage":        hullDamageEvent,
-			"Died":              diedEvent,
-			"ShieldState":       shieldStateEvent,
-			"Bounty":            bountyEvent,
-			"MissionAccepted":   missionAcceptedEvent,
-			"MissionCompleted":  missionCompletedEvent,
-			"MissionRedirected": missionRedirectedEvent,
-			"MissionAbandoned":  missionAbandonedEvent,
-			"Missions":          missionsInitEvent,
+		events := map[eventType]eventFn{
+			hullDamageEventType:        hullDamageEvent,
+			diedEventType:              diedEvent,
+			shieldStateEventType:       shieldStateEvent,
+			bountyEventType:            bountyEvent,
+			missionAcceptedEventType:   missionAcceptedEvent,
+			missionCompletedEventType:  missionCompletedEvent,
+			missionRedirectedEventType: missionRedirectedEvent,
+			missionAbandonedEventType:  missionAbandonedEvent,
+			missionsEventType:          missionsInitEvent,
 		}
 
 		for line := range t.Lines {
@@ -218,7 +244,7 @@ func (e *Notifier) Start() {
 				skipNotify = true
 			}
 
-			log.Debugln(line.Text)
+			// log.Debugln(line.Text)
 
 			if fn, ok := events[j.Event]; ok {
 				if err := fn(e, j, skipNotify); err != nil {
