@@ -1,12 +1,24 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"net/http"
 	"os"
+
+	"github.com/arl/statsviz"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	notifier "github.com/tommyblue/ED-AFK-Notifier"
 )
+
+var statsAddr = "localhost:6060"
+
+// Use `-ldflags "-X main.version=someversion"` when building baker to set this value
+var version = "-- unknown --"
+var flagVersion = flag.Bool("version", false, "print version number")
+var flagStats = flag.Bool("stats", false, fmt.Sprintf("show stats at %s", statsAddr))
 
 func init() {
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
@@ -15,6 +27,20 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+	if *flagVersion {
+		fmt.Printf("Version: %s\n", version)
+		return
+	}
+
+	if *flagStats {
+		statsviz.RegisterDefault()
+		go func() {
+			log.Infof("Stats available at: http://%s/debug/statsviz/\n", statsAddr)
+			log.Println(http.ListenAndServe(statsAddr, nil))
+		}()
+	}
+
 	if err := setupConfig(); err != nil {
 		log.Fatalf("Cannot read config: %v", err)
 	}
