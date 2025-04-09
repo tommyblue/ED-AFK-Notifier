@@ -27,7 +27,7 @@ func init() {
 }
 
 func main() {
-	log.Infof("Starting ED-AFK-Notifier v%s", notifier.Version)
+	log.Infof("Starting ED-AFK-Notifier v%s", version)
 	flag.Parse()
 	if *flagVersion {
 		fmt.Printf("Version: %s\n", version)
