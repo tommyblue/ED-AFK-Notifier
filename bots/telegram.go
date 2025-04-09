@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,10 +28,7 @@ func NewTelegram(token string, channelId int64) (*Telegram, error) {
 func (bot *Telegram) Start() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-	updates, err := bot.bot.GetUpdatesChan(u)
-	if err != nil {
-		log.Panic(err)
-	}
+	updates := bot.bot.GetUpdatesChan(u)
 
 	go func() {
 		for update := range updates {
