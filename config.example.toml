@@ -7,6 +7,16 @@
     kills = true # When true, send notification on each new kill, including total reward earned (noisy!)
     silent_kills = true # When true, reduce noise for kill notification, sending a notification every 10 kills
 
+# Notification service, choose either telegram or gotify
+[notification]
+    service = "telegram" # Options: telegram, gotify
+
 [telegram]
     token = "<bot token>" # Create a telegram bot using BotFather
     channelId = 12345678 # Replace with the channel id, obtained sending the `/channel` message to the bot
+
+[gotify]
+    url = "https://gotify.example.com" # URL to your Gotify server
+    token = "<app token>" # The application token from Gotify
+    title = "Elite Dangerous" # Title prefix for the notifications
+    priority = 5 # Priority of the notification (1-10, default is 5)
