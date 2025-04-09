@@ -231,9 +231,6 @@ func (e *Notifier) initNotifier() {
 func (e *Notifier) Start() {
 	e.bot.Start()
 
-	// Send startup notification
-	e.sendStartupNotification()
-
 	for {
 		log.Infoln("Reading journal...")
 		t, err := tail.TailFile(e.journalFile, tail.Config{Follow: true, Poll: true})
@@ -284,9 +281,9 @@ func (e *Notifier) Start() {
 	}
 }
 
-// sendStartupNotification sends a notification with version and config info
-func (e *Notifier) sendStartupNotification() {
-	msg := fmt.Sprintf("ED-AFK-Notifier v%s started\n\n", Version)
+// SendStartupNotification sends a notification with version and config info
+func (e *Notifier) SendStartupNotification(version string) {
+	msg := fmt.Sprintf("ED-AFK-Notifier v%s started\n\n", version)
 
 	// Add configuration information
 	msg += "Configuration:\n"

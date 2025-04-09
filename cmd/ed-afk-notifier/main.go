@@ -87,6 +87,7 @@ func main() {
 		log.Fatalf("Cannot initialize the notifier: %v", err)
 	}
 
+	notifier.SendStartupNotification(version)
 	notifier.Start()
 }
 
