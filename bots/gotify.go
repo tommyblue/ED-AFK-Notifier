@@ -59,11 +59,11 @@ func (g *Gotify) Start() {
 
 // Send sends a message to Gotify server
 func (g *Gotify) Send(text string) error {
-	return g.SendWithPriority(text, g.priority)
+	return g.sendWithPriority(text, g.priority)
 }
 
 // SendWithPriority sends a message to Gotify server with a specific priority
-func (g *Gotify) SendWithPriority(text string, priority int) error {
+func (g *Gotify) sendWithPriority(text string, priority int) error {
 	message := gotifyMessage{
 		Title:    g.title,
 		Message:  text,
