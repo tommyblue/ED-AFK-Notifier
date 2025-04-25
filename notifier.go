@@ -26,8 +26,19 @@ type Notifier struct {
 }
 
 type Cfg struct {
-	Token             string
-	ChannelId         int64
+	NotificationService string // Which notification service to use: "telegram" or "gotify"
+
+	// Telegram settings
+	TelegramToken     string
+	TelegramChannelId int64
+
+	// Gotify settings
+	GotifyURL      string
+	GotifyToken    string
+	GotifyTitle    string
+	GotifyPriority int // Priority of the Gotify notification
+
+	// Journal settings
 	JournalPath       string
 	FighterNotifs     bool
 	ShieldsNotifs     bool // notify about shields state
@@ -37,9 +48,24 @@ type Cfg struct {
 
 // New returns a Notifier with provided configuration
 func New(cfg *Cfg) (*Notifier, error) {
-	bot, err := bots.NewTelegram(cfg.Token, cfg.ChannelId)
-	if err != nil {
-		return nil, fmt.Errorf("cannot setup the Telegram bot: %v", err)
+	var (
+		bot bots.Bot
+		err error
+	)
+
+	switch cfg.NotificationService {
+	case "telegram":
+		bot, err = bots.NewTelegram(cfg.TelegramToken, cfg.TelegramChannelId)
+		if err != nil {
+			return nil, fmt.Errorf("cannot setup the Telegram bot: %v", err)
+		}
+	case "gotify":
+		bot, err = bots.NewGotify(cfg.GotifyURL, cfg.GotifyToken, cfg.GotifyTitle, cfg.GotifyPriority)
+		if err != nil {
+			return nil, fmt.Errorf("cannot setup the Gotify service: %v", err)
+		}
+	default:
+		return nil, fmt.Errorf("unknown notification service: %s", cfg.NotificationService)
 	}
 
 	j, err := journalFile(cfg.JournalPath)
@@ -252,5 +278,32 @@ func (e *Notifier) Start() {
 				}
 			}
 		}
+	}
+}
+
+// SendStartupNotification sends a notification with version and config info
+func (e *Notifier) SendStartupNotification(version string) {
+	msg := fmt.Sprintf("ED-AFK-Notifier v%s started\n\n", version)
+
+	// Add configuration information
+	msg += "Configuration:\n"
+	msg += fmt.Sprintf("- Notification service: %s\n", e.cfg.NotificationService)
+	msg += fmt.Sprintf("- Fighter notifications: %t\n", e.cfg.FighterNotifs)
+	msg += fmt.Sprintf("- Shield notifications: %t\n", e.cfg.ShieldsNotifs)
+	msg += fmt.Sprintf("- Kill notifications: %t", e.cfg.KillsNotifs)
+
+	if e.cfg.KillsNotifs {
+		if e.cfg.KillsSilentNotifs {
+			msg += " (silent mode)"
+		} else {
+			msg += " (all kills)"
+		}
+	}
+
+	// Try to send the notification
+	if err := e.bot.Send(msg); err != nil {
+		log.Errorf("Failed to send startup notification: %v", err)
+	} else {
+		log.Infoln("Startup notification sent successfully")
 	}
 }

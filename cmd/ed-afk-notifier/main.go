@@ -27,6 +27,7 @@ func init() {
 }
 
 func main() {
+	log.Infof("Starting ED-AFK-Notifier v%s", version)
 	flag.Parse()
 	if *flagVersion {
 		fmt.Printf("Version: %s\n", version)
@@ -45,14 +46,33 @@ func main() {
 		log.Fatalf("Cannot read config: %v", err)
 	}
 
+	// Get notification service from config, default to telegram for backward compatibility
+	service := viper.GetString("notification.service")
+	if service == "" {
+		service = "telegram"
+	}
+
 	cfg := &notifier.Cfg{
-		Token:             viper.GetString("telegram.token"),
-		ChannelId:         viper.GetInt64("telegram.channelId"),
-		JournalPath:       viper.GetString("journal.path"),
-		FighterNotifs:     viper.GetBool("journal.fighter"),
-		ShieldsNotifs:     viper.GetBool("journal.shields"),
-		KillsNotifs:       viper.GetBool("journal.kills"),
-		KillsSilentNotifs: viper.GetBool("journal.silent_kills"),
+		NotificationService: service,
+		JournalPath:         viper.GetString("journal.path"),
+		FighterNotifs:       viper.GetBool("journal.fighter"),
+		ShieldsNotifs:       viper.GetBool("journal.shields"),
+		KillsNotifs:         viper.GetBool("journal.kills"),
+		KillsSilentNotifs:   viper.GetBool("journal.silent_kills"),
+	}
+
+	// Set service-specific configuration
+	switch service {
+	case "telegram":
+		cfg.TelegramToken = viper.GetString("telegram.token")
+		cfg.TelegramChannelId = viper.GetInt64("telegram.channelId")
+	case "gotify":
+		cfg.GotifyURL = viper.GetString("gotify.url")
+		cfg.GotifyToken = viper.GetString("gotify.token")
+		cfg.GotifyTitle = viper.GetString("gotify.title")
+		cfg.GotifyPriority = viper.GetInt("gotify.priority")
+	default:
+		log.Fatalf("Unknown notification service: %s", service)
 	}
 
 	if viper.GetBool("journal.debug") {
@@ -67,6 +87,7 @@ func main() {
 		log.Fatalf("Cannot initialize the notifier: %v", err)
 	}
 
+	notifier.SendStartupNotification(version)
 	notifier.Start()
 }
 
@@ -80,8 +101,26 @@ func setupConfig() error {
 
 func logConfig(cfg *notifier.Cfg) {
 	log.Infof("Config:")
+	log.Infof("  Notification service: %s", cfg.NotificationService)
 	log.Infof("  Notify fighter status: %t", cfg.FighterNotifs)
 	log.Infof("  Notify shields status: %t", cfg.ShieldsNotifs)
 	log.Infof("  Notify on kills: %t (silent: %t)", cfg.KillsNotifs, cfg.KillsSilentNotifs)
 	log.Infof("  Journal file path: %s", cfg.JournalPath)
+
+	switch cfg.NotificationService {
+	case "telegram":
+		if cfg.TelegramToken == "" {
+			log.Warn("  Telegram token not set")
+		}
+		log.Infof("  Telegram channel ID: %d", cfg.TelegramChannelId)
+	case "gotify":
+		log.Infof("  Gotify URL: %s", cfg.GotifyURL)
+		if cfg.GotifyToken == "" {
+			log.Warn("  Gotify token not set")
+		}
+		if cfg.GotifyTitle != "" {
+			log.Infof("  Gotify notification title: %s", cfg.GotifyTitle)
+		}
+		log.Infof("  Gotify notification priority: %d", cfg.GotifyPriority)
+	}
 }

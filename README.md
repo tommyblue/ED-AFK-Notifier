@@ -14,6 +14,12 @@ hull damages and, in that case, immediately sends a
   - [Usage](#usage)
   - [Configuration](#configuration)
   - [How to create the Telegram bot](#how-to-create-the-telegram-bot)
+  - [How to configure Gotify for Notifications](#how-to-configure-gotify-for-notifications)
+    - [Prerequisites](#prerequisites)
+    - [Configuration Steps](#configuration-steps)
+    - [Example Configuration](#example-configuration)
+    - [Testing the Configuration](#testing-the-configuration)
+    - [Additional Notes](#additional-notes)
   - [All the details about AFK](#all-the-details-about-afk)
     - [Ship build](#ship-build)
     - [Stacking missions](#stacking-missions)
@@ -49,7 +55,7 @@ which means it's very easy to gain around **1.5 billion per day** (with 3 AFK ro
 
 ## Features
 
-Send telegram messages on:
+Send Telegram or Gotify messages on:
 
 * Ship shields going down/up
 * Ship hull damages
@@ -83,6 +89,10 @@ version of the config file):
     kills = true # When true, send notification on each new kill, including total reward earned (noisy!)
     silent_kills = true # When true, reduce noise for kill notification, sending a notification every 10 kills
 
+# Notification service, choose either telegram or gotify
+[notification]
+    service = "telegram" # Options: telegram, gotify
+    
 [telegram]
     token = "<bot token>"
     channelId = <channel ID>
@@ -121,6 +131,67 @@ as you can easily do it by sending messages with the BotFather bot. The screensh
 simple steps required to create a bot:
 
 ![](./botfather.png)
+
+## How to configure Gotify for Notifications
+
+### Prerequisites
+
+1. A running Gotify server. You can set it up by following the [Gotify documentation](https://gotify.net/docs/install).
+2. An application token generated in Gotify for authentication.
+
+### Configuration Steps
+
+1. Open your `config.toml` file located in the same directory as the ED-AFK-Notifier binary.
+2. Update the `[notification]` section to use Gotify as the notification service:
+   ```toml
+   [notification]
+   service = "gotify"
+   ```
+
+3. Add the `[gotify]` section with the following fields:
+   ```toml
+   [gotify]
+   url = "https://gotify.example.com" # Replace with your Gotify server URL
+   token = "<app token>" # Replace with your Gotify application token
+   title = "Elite Dangerous" # (Optional) Title prefix for notifications
+   priority = 5 # (Optional) Priority of the notification (1-10, default is 5)
+   ```
+
+   - **`url`**: The base URL of your Gotify server.
+   - **`token`**: The application token generated in Gotify.
+   - **`title`**: (Optional) A custom title for notifications. Defaults to "Elite Dangerous" if not provided.
+   - **`priority`**: (Optional) The priority level of notifications. Defaults to `5` if not specified.
+
+4. Save the `config.toml` file.
+
+### Example Configuration
+
+Here is an example configuration for Gotify:
+
+```toml
+[notification]
+service = "gotify"
+
+[gotify]
+url = "https://gotify.myserver.com"
+token = "abc123xyz"
+title = "ED Alerts"
+priority = 8
+```
+
+### Testing the Configuration
+
+1. Run the ED-AFK-Notifier application.
+2. Check your Gotify server for incoming notifications.
+3. If you encounter issues, ensure the `url` and `token` fields are correct and that your Gotify server is accessible.
+
+### Additional Notes
+
+- The `priority` field can be adjusted based on the importance of the notifications. Higher values indicate higher priority.
+- If the `title` field is not set, the default title "Elite Dangerous" will be used.
+
+For further assistance, refer to the [Gotify documentation](https://gotify.net/docs).
+
 
 ## All the details about AFK
 
